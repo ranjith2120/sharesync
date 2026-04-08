@@ -267,13 +267,23 @@ function renderFileList() {
     });
 }
 
-function downloadFile(encodedName) {
-    const a = document.createElement('a');
-    a.href = '/download/' + encodedName;
-    a.download = decodeURIComponent(encodedName);
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+async function downloadFile(encodedName) {
+    const fileName = decodeURIComponent(encodedName);
+    try {
+        const response = await fetch('/download/' + encodedName);
+        if (!response.ok) throw new Error('Download failed');
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    } catch (err) {
+        toast('Download failed: ' + err.message, 'error');
+    }
 }
 
 function getFileTypeClass(mime, name) {

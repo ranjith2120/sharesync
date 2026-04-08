@@ -21,6 +21,7 @@ public class FileHandler implements Runnable {
 
     private static final Path UPLOAD_DIR = Path.of("webserver", "uploads");
     private static final Path STATIC_DIR = Path.of("webserver", "static");
+    private static final long START_TIME = System.currentTimeMillis();
 
     private final Socket   socket;
     private final EventBus eventBus;
@@ -78,6 +79,8 @@ public class FileHandler implements Runnable {
                 handleDownload(rawOut, path);
             } else if (method.equals("GET") && path.equals("/files")) {
                 handleListFiles(rawOut);
+            } else if (method.equals("GET") && path.equals("/stats")) {
+                handleStats(rawOut);
             } else if (method.equals("GET")) {
                 handleStaticFile(rawOut, path);
             } else {
@@ -223,6 +226,37 @@ public class FileHandler implements Runnable {
         json.append("]");
 
         sendResponse(out, 200, "application/json", json.toString());
+    }
+
+    // ── GET /stats — Server health and usage stats ───────────
+    private void handleStats(OutputStream out) throws IOException {
+        long freeMem  = Runtime.getRuntime().freeMemory();
+        long totalMem = Runtime.getRuntime().totalMemory();
+        long usedMem  = totalMem - freeMem;
+        int  fileCount = 0;
+        long totalSize = 0;
+
+        if (Files.exists(UPLOAD_DIR)) {
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(UPLOAD_DIR)) {
+                for (Path file : stream) {
+                    if (Files.isRegularFile(file)) {
+                        fileCount++;
+                        totalSize += Files.size(file);
+                    }
+                }
+            }
+        }
+
+        String json = "{"
+                + "\"uptime\":"    + (System.currentTimeMillis() - START_TIME) + ","
+                + "\"usedMem\":"   + usedMem + ","
+                + "\"totalMem\":"  + totalMem + ","
+                + "\"fileCount\":" + fileCount + ","
+                + "\"totalSize\":" + totalSize + ","
+                + "\"sseClients\":" + eventBus.clientCount()
+                + "}";
+
+        sendResponse(out, 200, "application/json", json);
     }
 
     // ── Static file serving (index.html, styles, JS) ────────

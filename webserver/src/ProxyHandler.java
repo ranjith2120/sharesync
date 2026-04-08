@@ -66,8 +66,9 @@ public class ProxyHandler implements Runnable {
             // ── Route to backend ─────────────────────────────
             int backendPort;
             boolean isChatRoute = path.equals("/events")
-                               || path.equals("/chat")
-                               || path.equals("/status");
+                               || path.equals("/chat");
+            
+            boolean isStatsRoute = path.equals("/stats") || path.equals("/status");
 
             if (isChatRoute) {
                 backendPort = chatBalancer.nextPort();

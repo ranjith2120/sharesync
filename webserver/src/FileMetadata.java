@@ -12,6 +12,7 @@ public class FileMetadata {
     private final String mimeType;
     private final long   uploadTimestamp;
     private final String uploader;
+    private final boolean isImage;
 
     public FileMetadata(String fileName, long fileSize, String mimeType, String uploader) {
         this.fileName        = fileName;
@@ -19,6 +20,7 @@ public class FileMetadata {
         this.mimeType        = mimeType;
         this.uploadTimestamp  = System.currentTimeMillis();
         this.uploader        = (uploader == null || uploader.isBlank()) ? "Anonymous" : uploader;
+        this.isImage         = mimeType != null && mimeType.startsWith("image/");
     }
 
     // ── Getters ──────────────────────────────────────────────
@@ -27,6 +29,7 @@ public class FileMetadata {
     public String getMimeType()       { return mimeType; }
     public long   getUploadTimestamp(){ return uploadTimestamp; }
     public String getUploader()       { return uploader; }
+    public boolean isImage()          { return isImage; }
 
     // ── Human-readable size ──────────────────────────────────
     public String getReadableSize() {
@@ -44,7 +47,8 @@ public class FileMetadata {
              + "\"readableSize\":\"" + escapeJson(getReadableSize()) + "\","
              + "\"mimeType\":\""   + escapeJson(mimeType)   + "\","
              + "\"timestamp\":"    + uploadTimestamp          + ","
-             + "\"uploader\":\""   + escapeJson(uploader)   + "\""
+             + "\"uploader\":\""   + escapeJson(uploader)   + "\","
+             + "\"isImage\":"      + isImage
              + "}";
     }
 

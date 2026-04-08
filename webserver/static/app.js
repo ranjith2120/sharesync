@@ -51,6 +51,7 @@ const dom = {
     statMemory:        $('stat-memory'),
     statFiles:         $('stat-files'),
     statConnections:   $('stat-connections'),
+    statIp:            $('stat-ip'),
 };
 
 // ═══════════════════════════════════════════════════════
@@ -133,6 +134,11 @@ async function updateStats() {
         // Connections
         dom.statConnections.textContent = `${data.sseClients} SSE clients`;
         
+        // Local IP / Join URL
+        if (data.localIp && data.localIp !== 'localhost') {
+            dom.statIp.textContent = `http://${data.localIp}:8080`;
+        }
+
         // Also update online count badge
         if (dom.onlineCount) {
              dom.onlineCount.innerHTML = `<span class="pulse-dot"></span>${data.sseClients} online`;

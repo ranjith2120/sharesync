@@ -247,13 +247,19 @@ public class FileHandler implements Runnable {
             }
         }
 
+        String localIp = "localhost";
+        try {
+            localIp = java.net.InetAddress.getLocalHost().getHostAddress();
+        } catch (Exception ignored) {}
+
         String json = "{"
                 + "\"uptime\":"    + (System.currentTimeMillis() - START_TIME) + ","
                 + "\"usedMem\":"   + usedMem + ","
                 + "\"totalMem\":"  + totalMem + ","
                 + "\"fileCount\":" + fileCount + ","
                 + "\"totalSize\":" + totalSize + ","
-                + "\"sseClients\":" + eventBus.clientCount()
+                + "\"sseClients\":" + eventBus.clientCount() + ","
+                + "\"localIp\":\""  + localIp + "\""
                 + "}";
 
         sendResponse(out, 200, "application/json", json);

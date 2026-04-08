@@ -58,7 +58,12 @@ public class FileHandler implements Runnable {
             if (parts.length < 2) return;
 
             String method = parts[0].toUpperCase();
-            String path   = parts[1];
+            String fullPath = parts[1];
+            
+            // Strip query parameters for routing (e.g., /app.js?v=2 -> /app.js)
+            String path = fullPath.contains("?") 
+                        ? fullPath.substring(0, fullPath.indexOf('?')) 
+                        : fullPath;
 
             // Parse headers into key-value
             int contentLength = 0;

@@ -53,7 +53,13 @@ public class ProxyHandler implements Runnable {
             String[] parts       = requestLine.split(" ");
             if (parts.length < 2) return;
 
-            String path = parts[1];
+            String method = parts[0];
+            String fullPath = parts[1];
+            
+            // Strip query parameters for routing (e.g., /status?auth=... -> /status)
+            String path = fullPath.contains("?")
+                        ? fullPath.substring(0, fullPath.indexOf('?'))
+                        : fullPath;
 
             // ── Determine content length for body forwarding ─
             int contentLength = 0;

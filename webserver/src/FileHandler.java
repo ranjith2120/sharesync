@@ -184,10 +184,10 @@ public class FileHandler implements Runnable {
         }
 
         byte[] fileBytes = Files.readAllBytes(file);
-        String mime = guessMimeType(fileName);
-
+        
+        // Force octet-stream to ensure browser triggers download dialog
         String headers = "HTTP/1.1 200 OK\r\n"
-                + "Content-Type: " + mime + "\r\n"
+                + "Content-Type: application/octet-stream\r\n"
                 + "Content-Length: " + fileBytes.length + "\r\n"
                 + "Content-Disposition: attachment; filename=\"" + fileName + "\"\r\n"
                 + "Access-Control-Allow-Origin: *\r\n"

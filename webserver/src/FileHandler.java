@@ -188,13 +188,14 @@ public class FileHandler implements Runnable {
 
         byte[] fileBytes = Files.readAllBytes(file);
         
-        // Force octet-stream to ensure browser triggers download dialog
+        // Force octet-stream and use RFC 5987 compliant Content-Disposition
+        String encodedFilename = java.net.URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
         String headers = "HTTP/1.1 200 OK\r\n"
                 + "Content-Type: application/octet-stream\r\n"
                 + "Content-Length: " + fileBytes.length + "\r\n"
-                + "Content-Disposition: attachment; filename=\"" + fileName + "\"\r\n"
+                + "Content-Disposition: attachment; filename=\"" + fileName + "\"; filename*=UTF-8''" + encodedFilename + "\r\n"
                 + "Access-Control-Allow-Origin: *\r\n"
-                + "Connection: close\r\n"
+                + "Connection: keep-alive\r\n"
                 + "\r\n";
         out.write(headers.getBytes(StandardCharsets.UTF_8));
         out.write(fileBytes);

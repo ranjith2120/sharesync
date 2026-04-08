@@ -321,8 +321,13 @@ function renderFileList() {
 }
 
 function downloadFile(encodedName) {
-    // Direct location change is most reliable when server sends Content-Disposition: attachment
-    window.location.assign('/download/' + encodedName);
+    const fileName = decodeURIComponent(encodedName);
+    const a = document.createElement('a');
+    a.href = '/download/' + encodedName;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 }
 
 function getFileTypeClass(mime, name) {

@@ -218,6 +218,44 @@ body {
     50%      { opacity: 0.5; transform: scale(0.8); }
 }
 
+/* ── Stats Dashboard ────────────────────────────────────── */
+.stats-dashboard {
+    max-width: 1400px;
+    margin: 10px auto 0;
+    padding: 0 24px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 12px 20px;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.stat-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent-2);
+    font-family: 'JetBrains Mono', monospace;
+}
+
 /* ── Main Layout ────────────────────────────────────────── */
 #main-content {
     position: relative;
@@ -562,6 +600,15 @@ body {
 .file-icon.type-code   { background: rgba(168, 85, 247, 0.12); color: #a855f7; }
 .file-icon.type-doc    { background: rgba(99, 102, 241, 0.12); color: #818cf8; }
 .file-icon.type-other  { background: rgba(156, 163, 175, 0.08); color: #9ca3af; }
+
+.file-preview {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
+    border: 1px solid var(--border-subtle);
+    flex-shrink: 0;
+}
 
 .file-info {
     flex: 1;

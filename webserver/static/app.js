@@ -46,6 +46,11 @@ const dom = {
     sendBtn:           $('send-btn'),
     onlineCount:       $('online-count'),
     toastContainer:    $('toast-container'),
+    // Stats
+    statUptime:        $('stat-uptime'),
+    statMemory:        $('stat-memory'),
+    statFiles:         $('stat-files'),
+    statConnections:   $('stat-connections'),
 };
 
 // ═══════════════════════════════════════════════════════
@@ -98,6 +103,44 @@ function setConnectionStatus(connected) {
     state.connected = connected;
     dom.connectionStatus.className = 'connection-status ' + (connected ? 'connected' : 'disconnected');
     dom.statusText.textContent = connected ? 'Connected' : 'Disconnected';
+}
+
+// ═══════════════════════════════════════════════════════
+//  Server Stats
+// ═══════════════════════════════════════════════════════
+async function updateStats() {
+    try {
+        const res = await fetch('/stats');
+        if (!res.ok) return;
+        const data = await res.json();
+
+        // Uptime
+        const seconds = Math.floor(data.uptime / 1000);
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        dom.statUptime.textContent = `${h}h ${m}m ${s}s`;
+
+        // Memory
+        const usedMb = Math.round(data.usedMem / (1024 * 1024));
+        const totalMb = Math.round(data.totalMem / (1024 * 1024));
+        dom.statMemory.textContent = `${usedMb} / ${totalMb} MB`;
+
+        // Files
+        const sizeMb = (data.totalSize / (1024 * 1024)).toFixed(1);
+        dom.statFiles.textContent = `${data.fileCount} files / ${sizeMb} MB`;
+
+        // Connections
+        dom.statConnections.textContent = `${data.sseClients} SSE clients`;
+        
+        // Also update online count badge
+        if (dom.onlineCount) {
+             dom.onlineCount.innerHTML = `<span class="pulse-dot"></span>${data.sseClients} online`;
+        }
+
+    } catch (err) {
+        console.warn('[Stats] Polling failed');
+    }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -239,8 +282,12 @@ function renderFileList() {
         const icon = getFileIcon(file.mimeType, file.fileName);
         const time = formatTime(file.timestamp);
 
+        const visual = file.isImage 
+            ? `<img src="/download/${encodeURIComponent(file.fileName)}" class="file-preview">`
+            : `<div class="file-icon ${typeClass}">${icon}</div>`;
+
         item.innerHTML = `
-            <div class="file-icon ${typeClass}">${icon}</div>
+            ${visual}
             <div class="file-info">
                 <div class="file-name" title="${escapeHtml(file.fileName)}">${escapeHtml(file.fileName)}</div>
                 <div class="file-meta">
@@ -449,6 +496,8 @@ function toast(message, type = 'info') {
 document.addEventListener('DOMContentLoaded', () => {
     loadExistingFiles();
     connectSSE();
+    updateStats();
+    setInterval(updateStats, 5000); // Poll every 5s
 
     // Sync username fields
     dom.uploaderName.addEventListener('input', () => {

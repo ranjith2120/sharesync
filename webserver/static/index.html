@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ShareSync — Real-time file sharing and chat powered by raw Java sockets, SSE, and a custom reverse proxy.">
+    <title>ShareSync — Real-time File Sharing & Chat</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- ═══════════════  Background Effects  ═══════════════ -->
+    <div class="bg-effects">
+        <div class="gradient-orb orb-1"></div>
+        <div class="gradient-orb orb-2"></div>
+        <div class="gradient-orb orb-3"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <!-- ═══════════════  Header  ═══════════════ -->
+    <header id="app-header">
+        <div class="header-inner">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 32 32" fill="none">
+                        <path d="M16 2L28 9V23L16 30L4 23V9L16 2Z" stroke="currentColor" stroke-width="1.5" fill="none"/>
+                        <path d="M16 2V16M16 16L28 9M16 16L4 9M16 16V30M16 16L28 23M16 16L4 23" stroke="currentColor" stroke-width="0.8" opacity="0.4"/>
+                        <circle cx="16" cy="16" r="3" fill="currentColor" opacity="0.8"/>
+                    </svg>
+                </div>
+                <h1>Share<span class="accent">Sync</span></h1>
+            </div>
+            <div class="connection-status" id="connection-status">
+                <span class="status-dot"></span>
+                <span class="status-text">Connecting…</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ═══════════════  Main Content  ═══════════════ -->
+    <main id="main-content">
+        <div class="panels">
+            <!-- ─────────  Left Panel — File Sharing  ───────── -->
+            <section class="panel panel-files" id="panel-files">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14,2 14,8 20,8"/>
+                            <line x1="12" y1="18" x2="12" y2="12"/>
+                            <polyline points="9,15 12,12 15,15"/>
+                        </svg>
+                        <h2>File Sharing</h2>
+                    </div>
+                    <span class="file-count" id="file-count">0 files</span>
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="upload-zone">
+                    <div class="upload-zone-inner" id="upload-zone-inner">
+                        <div class="upload-icon">
+                            <svg viewBox="0 0 64 64" fill="none">
+                                <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.3"/>
+                                <path d="M32 44V24M24 30L32 22L40 30" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </div>
+                        <p class="upload-text">Drop files here or <button class="upload-btn-inline" id="browse-btn">browse</button></p>
+                        <p class="upload-hint">Max 50MB per file</p>
+                        <input type="file" id="file-input" multiple hidden>
+                    </div>
+                    <!-- Progress overlay -->
+                    <div class="upload-progress" id="upload-progress">
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 80 80">
+                                <circle cx="40" cy="40" r="35" stroke="rgba(255,255,255,0.1)" stroke-width="4" fill="none"/>
+                                <circle cx="40" cy="40" r="35" stroke="url(#progressGrad)" stroke-width="4" fill="none"
+                                        stroke-dasharray="220" stroke-dashoffset="220" stroke-linecap="round"
+                                        id="progress-circle" transform="rotate(-90 40 40)"/>
+                                <defs>
+                                    <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#6366f1"/>
+                                        <stop offset="100%" stop-color="#a855f7"/>
+                                    </linearGradient>
+                                </defs>
+                            </svg>
+                            <span class="progress-percent" id="progress-percent">0%</span>
+                        </div>
+                        <p class="progress-label" id="progress-label">Uploading…</p>
+                    </div>
+                </div>
+
+                <!-- Uploader name -->
+                <div class="uploader-input">
+                    <label for="uploader-name">Your name</label>
+                    <input type="text" id="uploader-name" placeholder="Anonymous" maxlength="30" autocomplete="off">
+                </div>
+
+                <!-- File List -->
+                <div class="file-list-container">
+                    <div class="file-list" id="file-list">
+                        <div class="file-list-empty" id="file-list-empty">
+                            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3">
+                                <path d="M10 6h18l8 8v28a2 2 0 01-2 2H10a2 2 0 01-2-2V8a2 2 0 012-2z"/>
+                                <path d="M28 6v10h8"/>
+                            </svg>
+                            <p>No files shared yet</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ─────────  Right Panel — Chat  ───────── -->
+            <section class="panel panel-chat" id="panel-chat">
+                <div class="panel-header">
+                    <div class="panel-title">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                        <h2>Live Chat</h2>
+                    </div>
+                    <span class="online-count" id="online-count">
+                        <span class="pulse-dot"></span>
+                        0 online
+                    </span>
+                </div>
+
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chat-messages">
+                    <div class="chat-welcome" id="chat-welcome">
+                        <div class="welcome-icon">💬</div>
+                        <p>Welcome to ShareSync chat!</p>
+                        <span>Messages appear in real-time via SSE</span>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-area">
+                    <div class="chat-user-row">
+                        <input type="text" id="chat-username" placeholder="Your name" maxlength="30" autocomplete="off">
+                    </div>
+                    <div class="chat-compose">
+                        <input type="text" id="chat-message" placeholder="Type a message…" maxlength="500" autocomplete="off">
+                        <button class="send-btn" id="send-btn" title="Send message">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22,2 15,22 11,13 2,9"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- ═══════════════  Toast Container  ═══════════════ -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

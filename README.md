@@ -46,6 +46,15 @@ java -cp . webserver.src.ShareSync
 Open your browser to:
 **[http://localhost:8080](http://localhost:8080)**
 
+## ☁️ Cloud Deployment (Railway/Heroku)
+This project is configured to work out-of-the-box on cloud platforms like **Railway** or **Heroku**.
+
+1.  **Port Mapping**: The app automatically reads the `$PORT` environment variable. The Proxy Server will bind to this port to ensure the container is marked as "Healthy" and "Online".
+2.  **Deployment Files**:
+    *   `Procfile`: Tells the platform to run `bash start.sh`.
+    *   `start.sh`: Handles compilation and execution in a Linux environment.
+3.  **Persistence Note**: Cloud platforms usually have ephemeral filesystems. Files uploaded to `webserver/uploads` will be lost when the app restarts unless you mount a **Railway Volume** to that directory.
+
 ## 📂 Project Structure
 ```text
 sharesync/

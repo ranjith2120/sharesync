@@ -51,16 +51,19 @@ public class ShareSync {
         LoadBalancer fileBalancer = new LoadBalancer(8081);
         LoadBalancer chatBalancer = new LoadBalancer(8082);
 
-        // ── 5. ProxyServer on 8080 ───────────────────────────
+        // ── 5. ProxyServer (Public Port) ─────────────────────
+        String portEnv = System.getenv("PORT");
+        int proxyPort = (portEnv != null) ? Integer.parseInt(portEnv) : 8080;
+
         Thread proxyThread = new Thread(
-                new ProxyServer(8080, fileBalancer, chatBalancer), "proxy-server");
+                new ProxyServer(proxyPort, fileBalancer, chatBalancer), "proxy-server");
         proxyThread.setDaemon(false);  // keep JVM alive
         proxyThread.start();
 
         System.out.println();
         System.out.println("╔═══════════════════════════════════════════╗");
         System.out.println("║   All servers running!                    ║");
-        System.out.println("║   Open http://localhost:8080 in browser   ║");
+        System.out.println("║   Server is listening on port: " + String.format("%-5d", proxyPort) + "  ║");
         System.out.println("╚═══════════════════════════════════════════╝");
         System.out.println();
 
